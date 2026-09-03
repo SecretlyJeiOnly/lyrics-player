@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>♡ Lyric Player ♡</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            background: #0b0b0b;
+
+            color: white;
+
+            font-family:
+                "Courier New",
+                monospace;
+
+        }
+
+
+        /* =========================
+           WINDOWS-STYLE BOX
+        ========================= */
+
+        .window {
+
+            width: 90%;
+
+            max-width: 650px;
+
+            background: #111;
+
+            border: 1px solid #444;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 0 40px
+                rgba(255,255,255,0.08);
+
+        }
+
+
+        /* =========================
+           TOP BAR
+        ========================= */
+
+        .top {
+
+            height: 40px;
+
+            display: flex;
+
+            align-items: center;
+
+            padding: 0 15px;
+
+            background: #191919;
+
+            border-bottom:
+                1px solid #333;
+
+        }
+
+
+        .dot {
+
+            width: 11px;
+
+            height: 11px;
+
+            border-radius: 50%;
+
+            background: #777;
+
+            margin-right: 7px;
+
+        }
+
+
+        .title {
+
+            margin-left: 10px;
+
+            font-size: 13px;
+
+            color: #aaa;
+
+        }
+
+
+        /* =========================
+           LYRIC AREA
+        ========================= */
+
+        .screen {
+
+            min-height: 300px;
+
+            padding: 45px 30px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            text-align: center;
+
+        }
+
+
+        #lyrics {
+
+            font-size: 21px;
+
+            line-height: 1.7;
+
+            max-width: 550px;
+
+            white-space: pre-wrap;
+
+        }
+
+
+        /* Typing cursor */
+
+        #lyrics::after {
+
+            content: "▌";
+
+            animation:
+                blink 0.8s infinite;
+
+        }
+
+
+        @keyframes blink {
+
+            50% {
+
+                opacity: 0;
+
+            }
+
+        }
+
+
+        /* =========================
+           BOTTOM
+        ========================= */
+
+        .bottom {
+
+            padding: 15px;
+
+            text-align: center;
+
+            border-top:
+                1px solid #333;
+
+        }
+
+
+        button {
+
+            padding:
+                9px 25px;
+
+            background: #eee;
+
+            color: #111;
+
+            border: none;
+
+            border-radius: 7px;
+
+            font-family:
+                "Courier New",
+                monospace;
+
+            cursor: pointer;
+
+        }
+
+
+        button:hover {
+
+            opacity: 0.75;
+
+        }
+
+
+        .hint {
+
+            margin-top: 10px;
+
+            color: #666;
+
+            font-size: 11px;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         PLAYER WINDOW
+    ========================= -->
+
+    <div class="window">
+
+
+        <!-- TOP BAR -->
+
+        <div class="top">
+
+            <div class="dot"></div>
+
+            <div class="dot"></div>
+
+            <div class="dot"></div>
+
+            <div class="title">
+                lyric-player.exe
+            </div>
+
+        </div>
+
+
+        <!-- LYRICS -->
+
+        <div class="screen">
+
+            <div id="lyrics">
+                Press PLAY ♫
+            </div>
+
+        </div>
+
+
+        <!-- BUTTON -->
+
+        <div class="bottom">
+
+            <button onclick="startLyrics()">
+                PLAY ♫
+            </button>
+
+            <div class="hint">
+                typewriter mode
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <script>
+
+
+        // ==========================================
+        // 🎵 YOUR LYRICS
+        // ==========================================
+
+        const lyrics = [
+
+            {
+                text:
+                    "Aminadong makasarili't mapagdamot",
+
+                speed: 45
+            },
+
+
+            {
+                text:
+                    "oh, sadyang naging ganito na lang sa’yo",
+
+                speed: 30
+            },
+
+
+            {
+                text:
+                    "Madaling pagbuksan pagka kakatok",
+
+                speed: 45
+            },
+
+
+            {
+                text:
+                    "Natatakot na baka ika'y mapalayo",
+
+                speed: 45
+            },
+
+
+            {
+                text:
+                    "Sana ako'y pakinggan",
+
+                speed: 30
+            },
+
+
+            {
+                text:
+                    "Natural na sa 'kin ang maging makabasag-pinggan",
+
+                speed: 45
+            },
+
+
+            {
+                text:
+                    "oh, masakit na sa iba pa manggagaling",
+
+                speed: 45
+            },
+
+
+            {
+                text:
+                    "Para sa 'kin, 'di kayo bagay na tingnan",
+
+                speed: 45
+            }
+
+        ];
+
+
+        // ==========================================
+        // ⚙️ PAUSE BETWEEN LINES
+        // ==========================================
+
+        const pauseBetweenLines = 900;
+
+
+        let line = 0;
+
+
+
+        // ==========================================
+        // ▶️ PLAY
+        // ==========================================
+
+        function startLyrics() {
+
+
+            line = 0;
+
+
+            document.getElementById(
+                "lyrics"
+            ).textContent = "";
+
+
+            typeLine();
+
+        }
+
+
+
+        // ==========================================
+        // ⌨️ TYPEWRITER EFFECT
+        // ==========================================
+
+        function typeLine() {
+
+
+            // Stop when all lyrics are finished
+
+            if (line >= lyrics.length) {
+
+                return;
+
+            }
+
+
+            const currentLyric =
+                lyrics[line];
+
+
+            const text =
+                currentLyric.text;
+
+
+            const speed =
+                currentLyric.speed;
+
+
+            let character = 0;
+
+
+            const lyricBox =
+                document.getElementById(
+                    "lyrics"
+                );
+
+
+            lyricBox.textContent = "";
+
+
+
+            // Type each character
+
+            function typeCharacter() {
+
+
+                if (
+                    character <
+                    text.length
+                ) {
+
+
+                    lyricBox.textContent +=
+                        text.charAt(
+                            character
+                        );
+
+
+                    character++;
+
+
+                    setTimeout(
+                        typeCharacter,
+                        speed
+                    );
+
+
+                }
+
+
+                else {
+
+
+                    // Move to next line
+
+                    line++;
+
+
+                    setTimeout(
+                        typeLine,
+                        pauseBetweenLines
+                    );
+
+                }
+
+            }
+
+
+            typeCharacter();
+
+        }
+
+
+    </script>
+
+
+</body>
+
+</html>
